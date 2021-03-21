@@ -4,23 +4,23 @@ import glob
 import torch
 from torch import tensor
 from PIL import Image
-
-from torch.utils.data import DataLoader, Dataset
-import torchvision.transforms as t
-import glob
-import torch
-from torch import tensor
-from PIL import Image
 from typing import Tuple
 
 data_path = '/content/drive/MyDrive/day_night_detection'
 
 
 def path_to_sq_tensor(p: str) -> tensor:
+    # try:
     image = Image.open(p)
+    # except AttributeError:
+    #     print('cannot read', p)
+    #     print('file exists:', Path(p).exists())
+    #     return torch.empty_like(tensor([]))
     image = resize_image(image, 360)
     tens = t.ToTensor()(image)
-    return tens
+    tens_normalized = t.Normalize(mean=[0.485, 0.456, 0.406],
+                       std=[0.229, 0.224, 0.225])(tens)
+    return tens_normalized
 
 
 def all_true(data: list) -> Tuple[bool, list]:
@@ -128,11 +128,5 @@ def resize_image(image: Image, length: int) -> Image:
 
 
 if __name__ == '__main__':
-    pass
-
-
-    transformed_dataset = ImagesDataset(path_to_data=data_path)
-    train_dl = DataLoader(transformed_dataset, batch_size=1, shuffle=True, num_workers=2, pin_memory=True)
-    for batch in train_dl:
-        image, label = batch
-        print(image)
+    path = '/mnt/data/Algo/dataset/foresight/segmentation_detection/sky_road_all_marking/VIS/items/000103_d0de3a12-75cd-11eb-9ec5-000000000067.jpg'
+    im = path_to_sq_tensor(path)

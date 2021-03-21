@@ -18,7 +18,7 @@ epochs = 2
 
 def get_wrong_classified_images(preds, labels, images_paths=None):
     if images_paths is None:
-        images_paths = [None for p in preds]
+        images_paths = [None for _ in preds]
     wrong_predictions = preds.argmax(dim=1).ne(labels)
     return [im_path for im_path, wrong in zip(images_paths, wrong_predictions) if wrong]
 
@@ -52,11 +52,7 @@ if __name__ == '__main__':
         wrong += len(wc)
         wrong_examples.extend(wc)
 
-    print(f'total: {total}, wrong: {wrong}, error of {wrong / total}')
-    print('wrong on:')
-    for ex in wrong_examples:
-        print(ex)
-    exit(0)
+
 
 # model = Model(arguments)
 # model.load_state_dict(torch.load(PATH))
