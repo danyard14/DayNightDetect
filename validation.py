@@ -7,6 +7,7 @@ from day_night_detector import DayNightDetector
 from get_data import get_all_with_field
 from test import get_wrong_classified_images
 from train import get_num_correct
+import torchvision
 
 scene_detection_col = 'scene_detection'
 learning_rates = [0.001, 0.0001]
@@ -16,7 +17,11 @@ total_correct = 0
 
 val_data = get_all_with_field(scene_detection_col, field_name='train_test', field_value='val')
 val_ds = ImagesDataset(val_data)
-detector = DayNightDetector()
+detector = torchvision.models.resnet18(pretrained=True)
+num_ftrs = detector.fc.in_features
+detector.fc = torch.nn.Linear(num_ftrs, 2)
+detector.fc = detector.fc.cuda()
+detector = detector.cuda()
 
 if __name__ == '__main__':
     print('starting validation')
@@ -25,7 +30,7 @@ if __name__ == '__main__':
         for batch_size in batch_sizes:
             print('batch_size=', batch_size)
             total_correct = 0
-            detector.load_state_dict(torch.load(f'models/model_lr:0.0001_bs:{batch_size}.pth'))
+            detector.load_state_dict(torch.load(f'models/resnet50_lr:0.0001_bs:{batch_size}.pth'))
             detector = detector.to(device='cuda')
             detector.eval()
 
