@@ -41,6 +41,7 @@ def should_mark(num_processed: int) -> bool:
 
 
 if __name__ == '__main__':
+    from efficientnet_pytorch import EfficientNet
 
     print('starting training')
     for lr in learning_rates:
@@ -48,13 +49,13 @@ if __name__ == '__main__':
         for batch_size in batch_sizes:
             print('batch_size=', batch_size)
 
-            detector = torchvision.models.resnet18(pretrained=True)
-            num_ftrs = detector.fc.in_features
-            detector.fc = nn.Linear(num_ftrs, 2)
-            detector.fc = detector.fc.cuda()
+            detector = EfficientNet.from_pretrained('efficientnet-b6')
+
+            detector._fc = nn.Linear(1280, 4)
+            detector._fc = detector._fc.cuda()
             detector = detector.cuda()
             for p in detector.named_parameters():
-                if 'fc' in p[0]:
+                if '_fc' not in p[0]:
                     p[1].requires_grad = False
 
             # train
@@ -98,7 +99,7 @@ if __name__ == '__main__':
                 tb.add_scalar('Accuracy total', total_correct / len(train_ds))
                 tb.close()
 
-                torch.save(detector.state_dict(), f'models/resnet50_lr:{lr}_bs:{batch_size}.pth')
+                torch.save(detector.state_dict(), f'models/efficientnet-b6_lr:{lr}_bs:{batch_size}.pth')
 
 
 
